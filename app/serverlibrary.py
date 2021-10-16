@@ -1,5 +1,3 @@
-
-
 def mergesort(array, byfunc=None):
 
 
@@ -37,6 +35,7 @@ class Stack:
         self.__items = []
         
     def push(self, item):
+        assert item is not None
         self.__items.append(item)
         return self.__items
 
@@ -131,7 +130,7 @@ class EvaluateExpression:
           operator_stack.push(c)
           print('yes')"""
 
-        while operator_stack.is_empty or operator_stack.peek() not in '()':
+        while (not operator_stack.is_empty) and (operator_stack.peek() not in '()'):
           R = operand_stack.pop()
           L = operand_stack.pop()
           op = operator_stack.pop()
@@ -146,8 +145,9 @@ class EvaluateExpression:
 
 
       if c in "*/" :
-        
-        while operator_stack.peek() in '*/':
+        print("this is the token in if c in '/*'", c)
+        while operator_stack.peek() is not None and operator_stack.peek() in '*/':
+          
           
           R = operand_stack.pop()
           L = operand_stack.pop()
@@ -182,9 +182,18 @@ class EvaluateExpression:
     print(operand_stack._Stack__items,operator_stack._Stack__items)
 
     while  operator_stack.peek() != None:
-      if operator_stack.peek() == '(':
-
+      if operator_stack.peek() == '(' and operator_stack.size >1:
+        print("operator_stack.peek() == '(' and operator_stack.size >1")
+        R = operand_stack.pop() 
+        L = operand_stack.pop()
         operator_stack.pop()
+        op = '*'
+        result = eval(''.join(map(str,[L , op , R])))
+        operand_stack.push(result)
+      
+      else:
+        operator_stack.pop()
+
       if operator_stack.peek() != None:
         R = operand_stack.pop() 
 
