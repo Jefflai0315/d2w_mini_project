@@ -1,4 +1,4 @@
-// Transcrypt'ed from Python, 2021-10-15 21:12:13
+// Transcrypt'ed from Python, 2021-10-19 01:16:09
 import {AssertionError, AttributeError, BaseException, DeprecationWarning, Exception, IndexError, IterableError, KeyError, NotImplementedError, RuntimeWarning, StopIteration, UserWarning, ValueError, Warning, __JsIterator__, __PyIterator__, __Terminal__, __add__, __and__, __call__, __class__, __envir__, __eq__, __floordiv__, __ge__, __get__, __getcm__, __getitem__, __getslice__, __getsm__, __gt__, __i__, __iadd__, __iand__, __idiv__, __ijsmod__, __ilshift__, __imatmul__, __imod__, __imul__, __in__, __init__, __ior__, __ipow__, __irshift__, __isub__, __ixor__, __jsUsePyNext__, __jsmod__, __k__, __kwargtrans__, __le__, __lshift__, __lt__, __matmul__, __mergefields__, __mergekwargtrans__, __mod__, __mul__, __ne__, __neg__, __nest__, __or__, __pow__, __pragma__, __pyUseJsNext__, __rshift__, __setitem__, __setproperty__, __setslice__, __sort__, __specialattrib__, __sub__, __super__, __t__, __terminal__, __truediv__, __withblock__, __xor__, abs, all, any, assert, bool, bytearray, bytes, callable, chr, copy, deepcopy, delattr, dict, dir, divmod, enumerate, filter, float, getattr, hasattr, input, int, isinstance, issubclass, len, list, map, max, min, object, ord, pow, print, property, py_TypeError, py_iter, py_metatype, py_next, py_reversed, py_typeof, range, repr, round, set, setattr, sorted, str, sum, tuple, zip} from './org.transcrypt.__runtime__.js';
 var __name__ = '__main__';
 export var mergesort = function (array, byfunc) {
@@ -129,23 +129,36 @@ export var EvaluateExpression =  __class__ ('EvaluateExpression', [object], {
 		print (expression, tokens);
 		for (var c of tokens) {
 			if (!__in__ (c, '*/+-()')) {
-				operand_stack.push (c);
+				if (operand_stack.peek () == '-') {
+					var minus = operand_stack.py_pop ();
+					var to_add = minus + c;
+					operand_stack.push (to_add);
+				}
+				else {
+					operand_stack.push (c);
+				}
 				print ('1', operand_stack._Stackpy_items, operator_stack._Stackpy_items);
 			}
 			if (__in__ (c, '+-')) {
-				while (!(operator_stack.is_empty) && !__in__ (operator_stack.peek (), '()')) {
-					var R = operand_stack.py_pop ();
-					var L = operand_stack.py_pop ();
-					var op = operator_stack.py_pop ();
-					print (op);
-					if (op == '/') {
-						var op = '//';
-					}
-					var result = eval (''.join (map (str, [L, op, R])));
-					operand_stack.push (result);
+				if (__in__ (c, '-')) {
+					operand_stack.push (c);
 				}
-				operator_stack.push (c);
-				print ('2', operand_stack._Stackpy_items, operator_stack._Stackpy_items);
+				else {
+					while (!(operator_stack.is_empty) && !__in__ (operator_stack.peek (), '()')) {
+						var R = operand_stack.py_pop ();
+						var L = operand_stack.py_pop ();
+						var op = operator_stack.py_pop ();
+						print (op);
+						if (op == '/') {
+							var op = '//';
+						}
+						var result = eval (''.join (map (str, [L, op, R])));
+						print (result);
+						operand_stack.push (result);
+					}
+					operator_stack.push (c);
+					print ('2', operand_stack._Stackpy_items, operator_stack._Stackpy_items);
+				}
 			}
 			if (__in__ (c, '*/')) {
 				print ("this is the token in if c in '/*'", c);
@@ -191,9 +204,8 @@ export var EvaluateExpression =  __class__ ('EvaluateExpression', [object], {
 				var op = '*';
 				var result = eval (''.join (map (str, [L, op, R])));
 				operand_stack.push (result);
-			}
-			else {
-				operator_stack.py_pop ();
+				var just_pop = operator_stack.py_pop ();
+				print (just_pop);
 			}
 			if (operator_stack.peek () != null) {
 				var R = operand_stack.py_pop ();

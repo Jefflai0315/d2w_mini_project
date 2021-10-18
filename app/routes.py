@@ -59,18 +59,22 @@ def questions():
 @application.route('/challenges', methods=['GET', 'POST'])
 @login_required
 def challenges():
+	flash('started')
 	challenges = current_user.challenges.all()
 	form = ChallengeAnswerForm()
 	recordsquery = TimeRecord.query.filter_by(user_id=current_user.id).all()
 	records = { c.id: r.elapsed_time for r in recordsquery for c in challenges if r.challenge_id== c.id}
 	if form.validate_on_submit():
+		flash('submitted')
 		record = TimeRecord()
+		#flash(eval(form.elapsed_time.data))
+		print(form.elapsed_time.data)
 		record.elapsed_time = int(form.elapsed_time.data)
 		record.challenge_id = int(form.challenge_id.data)
 		record.user_id = current_user.id
 		answer = form.answer.data
 		challenge = Challenge.query.filter_by(id=form.challenge_id.data).first()
-		if int(answer) == int(challenge.question.answer):
+		if int(answer) == int(float(challenge.question.answer)):
 			db.session.add(record)
 			db.session.commit()
 			challenges = current_user.challenges.all()

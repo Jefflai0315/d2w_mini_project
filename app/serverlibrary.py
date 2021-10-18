@@ -1,3 +1,5 @@
+
+
 def mergesort(array, byfunc=None):
 
 
@@ -120,28 +122,35 @@ class EvaluateExpression:
     
     for c in tokens:
       if c not in '*/+-()':
-        operand_stack.push(c)
+        if operand_stack.peek() == '-':
+          minus = operand_stack.pop()
+          to_add = minus + c
+          operand_stack.push(to_add)
+        else: 
+          operand_stack.push(c)
         print('1',operand_stack._Stack__items,operator_stack._Stack__items)
 
 
       if c in '+-':
 
-        """if len(operand_stack._Stack__items) ==1:
+        if c in '-':
+          operand_stack.push(c)
+          
+        else:
+          while (not operator_stack.is_empty) and (operator_stack.peek() not in '()'):
+            R = operand_stack.pop()
+            L = operand_stack.pop()
+            op = operator_stack.pop()
+            print(op)
+            if op == '/':
+              op = '//'  
+
+            result = eval(''.join(map(str,[L , op , R])))
+            print(result)
+            operand_stack.push(result)
+            
           operator_stack.push(c)
-          print('yes')"""
-
-        while (not operator_stack.is_empty) and (operator_stack.peek() not in '()'):
-          R = operand_stack.pop()
-          L = operand_stack.pop()
-          op = operator_stack.pop()
-          print(op)
-          if op == '/':
-            op = '//'  
-
-          result = eval(''.join(map(str,[L , op , R])))
-          operand_stack.push(result)
-        operator_stack.push(c)
-        print('2',operand_stack._Stack__items,operator_stack._Stack__items)
+          print('2',operand_stack._Stack__items,operator_stack._Stack__items)
 
 
       if c in "*/" :
@@ -191,8 +200,9 @@ class EvaluateExpression:
         result = eval(''.join(map(str,[L , op , R])))
         operand_stack.push(result)
       
-      else:
-        operator_stack.pop()
+      
+        just_pop = operator_stack.pop()
+        print(just_pop)
 
       if operator_stack.peek() != None:
         R = operand_stack.pop() 
