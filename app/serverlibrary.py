@@ -105,12 +105,11 @@ class EvaluateExpression:
     R = operand_stack.pop()
     L = operand_stack.pop()
     op = operator_stack.pop()
-    print(op)
     if op == '/':
       op = '//'  
 
     result = eval(''.join(map(str,[L , op , R])))
-    
+    print("processing:  ", L , op , R)
     operand_stack.push(result)
 
   def evaluate(self):
@@ -118,109 +117,165 @@ class EvaluateExpression:
     operator_stack = Stack()
     expression = self.insert_space()
     tokens = expression.split()
-    print(expression, tokens)
-    
+    print("expression",expression)
+    print("token", tokens)
+
+    operator = ['*','/','+','-','(',')']
+
+    prev_operand = True   
+    #to check if the previous c-character is an operator
+    #to account for case eg: 2*-2
+
     for c in tokens:
-      if c not in '*/+-()':
-        if operand_stack.peek() == '-':
-          minus = operand_stack.pop()
-          to_add = minus + c
-          operand_stack.push(to_add)
-        else: 
-          operand_stack.push(c)
-        print('1',operand_stack._Stack__items,operator_stack._Stack__items)
-
-
-      if c in '+-':
-
-        if c in '-':
-          operand_stack.push(c)
+      print("char: ",c, "operand stack: ",operand_stack._Stack__items, "operator stack: " , operator_stack._Stack__items)
+      
+      if c not in operator: #add operand to operand stack
+        operand_stack.push(c) 
+        prev_operand = True
+      
+      elif c in '+-':
+        
+        if  c =='-' and operand_stack.is_empty: #if the first character is "c", add "0-{the rest}" into the equation
+          operand_stack.push(0)
+          operator_stack.push(c)
+        elif c == "-" and prev_operand == False: # this is to account for eg: 2*-2 case
+         
+          if operator_stack.peek() in ['*','/'] :
+            print('when "-" meets "*/"')
+            print('pushing "-1" and "*/" into the Operand and Operator Stack respectively')
+              
+            operand_stack.push('-1') #from eg: 2*-2 
+            operator_stack.push('*') # to eg: 2 * [-1] * 2
           
+          elif operator_stack.peek() =="(":
+            operand_stack.push(0)
+            operator_stack.push(c)
+        else:
+          while (not operator_stack.is_empty) and (operator_stack.peek() not in ['(',')']): #process operator with the conditions
+            self.process_operator( operand_stack, operator_stack)
+          operator_stack.push(c)
+          prev_operand = False
+      
+      
+
+      elif c in '*/':
+        while operator_stack.peek() in ['*','/']:
+          self.process_operator( operand_stack, operator_stack)
+        operator_stack.push(c)
+        prev_operand = False
+
+      elif c == '(':
+        operator_stack.push(c)
+        prev_operand = False
+
+      elif c == ')':
+        while operator_stack.peek() != '(':
+          self.process_operator( operand_stack, operator_stack)
+        
+
+    print('whats remaining: ' , 'Operand: ', operand_stack._Stack__items, ' Operator: ', operator_stack._Stack__items  )
+
+    while not operator_stack.is_empty and operand_stack.size>1:
+
+      if operator_stack.peek() in '()':
+        operator_stack.pop()
+      else:
+        self.process_operator( operand_stack, operator_stack)
+
+    return operand_stack.pop()
+
+
+
+
+
+
+
+
+
+
+
+
+
+  '''def evaluate(self):
+    operand_stack = Stack()
+    operator_stack = Stack()
+    expression = self.insert_space()
+    tokens = expression.split()
+    print(expression, tokens)
+
+    operator = ['*','/','+','-','(',')']
+
+
+    for c in tokens:
+      print(c, operand_stack._Stack__items, operator_stack._Stack__items)
+      if c not in operator:
+        operand_stack.push(c)
+      
+      elif c in '+-':
+        if c == "-":
+          if operator_stack.peek() in ['*','/'] and operand_stack.size >= 2:
+            while (not operator_stack.is_empty) and (operator_stack.peek() not in '()'):
+              print('come in')
+              self.process_operator(operand_stack, operator_stack)
+              
+            operand_stack.push('1') #accomodate the minus
+            operator_stack.push('*')
+          else:
+            operand_stack.push('-1') #accomodate the minus
+            operator_stack.push('*')
+
         else:
           while (not operator_stack.is_empty) and (operator_stack.peek() not in '()'):
-            R = operand_stack.pop()
+            self.process_operator(operand_stack, operator_stack)
+          operator_stack.push(c)
+
+      elif c in '*/':
+        while operand_stack.size >=2 and operator_stack.peek() in '*/' :
+          self.process_operator(operand_stack, operator_stack)
+        operator_stack.push(c)
+
+      elif c == '(':
+        operator_stack.push(c)
+
+      elif c == ')':
+        while operator_stack.peek() != '(':
+          self.process_operator(operand_stack, operator_stack)
+        operator_stack.push(c)
+        
+        if operand_stack.size >=2 and operator_stack.size >2:
+          if operator_stack._Stack__items[-1] == ')' and operator_stack._Stack__items[-2] == '(' and operand_stack._Stack__items[-2]== '-1':
+            print(operator_stack._Stack__items[-1], operator_stack._Stack__items[-2])
+            operator_stack.pop()
+            operator_stack.pop()
+            R= operand_stack.pop()
             L = operand_stack.pop()
             op = operator_stack.pop()
-            print(op)
-            if op == '/':
-              op = '//'  
-
-            result = eval(''.join(map(str,[L , op , R])))
+            result = eval(''.join(map(str,[L ,op, R])))
             print(result)
             operand_stack.push(result)
-            
-          operator_stack.push(c)
-          print('2',operand_stack._Stack__items,operator_stack._Stack__items)
 
 
-      if c in "*/" :
-        print("this is the token in if c in '/*'", c)
-        while operator_stack.peek() is not None and operator_stack.peek() in '*/':
-          
-          
-          R = operand_stack.pop()
-          L = operand_stack.pop()
-          op = operator_stack.pop()
-          print(op)
-          if op == '/':
-            op = '//'  
+    print('whats remaining: ' , 'Operand: ', operand_stack._Stack__items, ' Operator: ', operator_stack._Stack__items  )
 
-          result = eval(''.join(map(str,[L , op , R])))
-          operand_stack.push(result)
-        operator_stack.push(c)
-        print('3',operand_stack._Stack__items,operator_stack._Stack__items)
+    while not operator_stack.is_empty:
 
-
-      if c == '(':
-        operator_stack.push(c)
-
-      if c ==')':
-        while operator_stack.peek() != '(':
-          R = operand_stack.pop()
-          L = operand_stack.pop()
-          op = operator_stack.pop()
-          print(op)
-          if op == '/':
-            op = '//'  
-
-          result = eval(''.join(map(str,[L , op , R])))
-          operand_stack.push(result)
-        print('4',operand_stack._Stack__items,operator_stack._Stack__items)
-
-
-    print(operand_stack._Stack__items,operator_stack._Stack__items)
-
-    while  operator_stack.peek() != None:
-      if operator_stack.peek() == '(' and operator_stack.size >1:
-        print("operator_stack.peek() == '(' and operator_stack.size >1")
-        R = operand_stack.pop() 
-        L = operand_stack.pop()
+      if operator_stack.peek() in '()':
+        
         operator_stack.pop()
-        op = '*'
-        result = eval(''.join(map(str,[L , op , R])))
-        operand_stack.push(result)
-      
-      
-        just_pop = operator_stack.pop()
-        print(just_pop)
 
-      if operator_stack.peek() != None:
-        R = operand_stack.pop() 
+      elif operand_stack.size >=2:
+        self.process_operator(operand_stack, operator_stack)
+      else:
+        print('operand stack < 2 items, cant operate')
+    
+    if operator_stack.is_empty and operand_stack.size>=2: # if left all negative values
+      R = operand_stack.pop()
+      L = operand_stack.pop()
+      result = eval(''.join(map(str,[L,'+', R])))
+    
+      operand_stack.push(result)
 
-        L = operand_stack.pop()
-        op = operator_stack.pop()
-        print(op,L,R)
-        if op == '/':
-          op = '//'  
-
-        result = eval(''.join(map(str,[L , op , R])))
-        operand_stack.push(result)
-        print(operand_stack.peek())
-      
-
-    result1 = operand_stack.pop()
-    print(result1)
-    return result1
+    return operand_stack.pop()'''
 
 
 
